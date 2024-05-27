@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import extract, transform, load
+from scripts import extract, transform, load
 import datetime
 import schedule
 import time
