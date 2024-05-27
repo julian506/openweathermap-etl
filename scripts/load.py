@@ -4,7 +4,7 @@ import urllib
 from sqlalchemy.orm import sessionmaker
 import uuid as uuid_lib
 from sqlalchemy import create_engine
-from ManizalesWeather import ManizalesWeather
+from classes.ManizalesWeather import ManizalesWeather
 
 def upload_data(transformed_weather_data):
     AZURE_ODBC_CONNECTION_STRING: str | None = os.getenv("AZURE_ODBC_CONNECTION_STRING")
