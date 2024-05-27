@@ -22,14 +22,14 @@ def convertTemperatureValuesToCelsius(
 
 
 def addTimestampToData(data, data_utc_datetime) -> dict[str, float | datetime.datetime]:
-    data["consulted_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data["datetime"] = datetime.datetime.fromtimestamp(data_utc_datetime).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    data["consulted_at"] = datetime.datetime.now()
+    data["datetime"] = datetime.datetime.fromtimestamp(data_utc_datetime)
     return data
 
 
-def transformExtractedData(extracted_data) -> dict[str, float | int | datetime.datetime]:
+def transformExtractedData(
+    extracted_data,
+) -> dict[str, float | int | datetime.datetime]:
     temp_values: dict[str, float] = extractTemperatureValues(extracted_data)
 
     data_utc_datetime: int = extracted_data["dt"]
