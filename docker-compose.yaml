@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  etl_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: etl_service
+    volumes:
+      - .:/usr/src/app
