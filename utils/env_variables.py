@@ -1,11 +1,8 @@
 import os
 from utils import logs
-from logging import Logger
-
-logger: Logger = logs.getLogger()
 
 
-def readEnvVariable(ENV_VARIABLE_NAME) -> str:
+def readEnvVariable(ENV_VARIABLE_NAME: str) -> str:
     ENV_VARIABLE: str | None = os.getenv(ENV_VARIABLE_NAME)
     if ENV_VARIABLE is None or ENV_VARIABLE == "":
         raise logs.exceptionLog(
