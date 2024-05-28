@@ -1,54 +1,76 @@
 import urllib.parse
 import os
 import urllib
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
 import uuid as uuid_lib
 from sqlalchemy import create_engine, desc
 from classes.ManizalesWeather import ManizalesWeather
-import datetime as datetime_lib
+from utils import env_variables, logs
 
 
 def isCurrentRecordNew(session, new_weather_record: ManizalesWeather) -> bool:
-    latest_record_in_db: ManizalesWeather = (
-        session.query(ManizalesWeather)
-        .order_by(desc(ManizalesWeather.datetime))
-        .first()
-    )
+    try:
+        latest_record_in_db: ManizalesWeather = (
+            session.query(ManizalesWeather)
+            .order_by(desc(ManizalesWeather.datetime))
+            .first()
+        )
+    except:
+        raise logs.exceptionLog(
+            "There was an error trying to retrieve the latest register from the database"
+        )
+
     if latest_record_in_db == None:
         return True
     return new_weather_record.datetime > latest_record_in_db.datetime
 
 
-def upload_data(transformed_weather_data):
-    AZURE_ODBC_CONNECTION_STRING: str | None = os.getenv("AZURE_ODBC_CONNECTION_STRING")
-    if AZURE_ODBC_CONNECTION_STRING == None:
-        raise Exception("AZURE_ODBC_CONNECTION_STRING can not be empty")
+def createAzureSession(AZURE_ODBC_CONNECTION_STRING: str) -> Session:
+    try:
+        params: str = urllib.parse.quote_plus(AZURE_ODBC_CONNECTION_STRING)
+        conn_str: str = f"mssql+pyodbc:///?odbc_connect={params}"
+        engine = create_engine(conn_str, echo=True)
 
-    params: str = urllib.parse.quote_plus(AZURE_ODBC_CONNECTION_STRING)
-    conn_str: str = f"mssql+pyodbc:///?odbc_connect={params}"
+        logs.infoLog(
+            "The connection with the Azure SQL Database has been completed successfully"
+        )
+        return Session(engine)
+    except:
+        raise logs.exceptionLog("There was an error creating the Azure Session")
 
-    engine = create_engine(conn_str, echo=True)
-    print("connection is ok")
 
-    Session = sessionmaker(bind=engine)
-    session = Session()
+def commitDataIntoDatabase(session: Session, new_weather_record: ManizalesWeather):
+    try:
+        session.add(new_weather_record)
+        session.commit()
+        logs.infoLog("The new record has been successfully commited into the database")
+    except:
+        raise logs.exceptionLog(
+            "There was an error commiting the new data into the database"
+        )
 
-    new_weather_record = ManizalesWeather(
-        uuid_value=uuid_lib.uuid4(),
-        datetime=transformed_weather_data["datetime"],
-        consulted_at=transformed_weather_data["consulted_at"],
-        temp=transformed_weather_data["temp"],
-        temp_min=transformed_weather_data["temp_min"],
-        temp_max=transformed_weather_data["temp_max"],
-        feels_like=transformed_weather_data["feels_like"],
+
+def upload_data(transformed_weather_data) -> None:
+    AZURE_ODBC_CONNECTION_STRING: str = env_variables.readEnvVariable(
+        "AZURE_ODBC_CONNECTION_STRING"
     )
 
-    if not isCurrentRecordNew(session, new_weather_record):
-        print("Current data is not newer than the data existing in the DB. Skiping.")
-        return
+    with createAzureSession(AZURE_ODBC_CONNECTION_STRING) as session:
+        new_weather_record = ManizalesWeather(
+            uuid_value=uuid_lib.uuid4(),
+            datetime=transformed_weather_data["datetime"],
+            consulted_at=transformed_weather_data["consulted_at"],
+            temp=transformed_weather_data["temp"],
+            temp_min=transformed_weather_data["temp_min"],
+            temp_max=transformed_weather_data["temp_max"],
+            feels_like=transformed_weather_data["feels_like"],
+        )
 
-    session.add(new_weather_record)
+        if not isCurrentRecordNew(session, new_weather_record):
+            logs.infoLog(
+                "Current data is not newer than the data existing in the DB. Skiping."
+            )
+            return
 
-    session.commit()
-
-    session.close()
+        commitDataIntoDatabase(session, new_weather_record)
+    return
