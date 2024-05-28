@@ -2,9 +2,6 @@ from typing import Any
 import requests
 import os
 from utils import env_variables, requests_handler, logs
-from logging import Logger
-
-logger: Logger = logs.getLogger()
 
 
 def getCoordinatesByZipCode(API_BASE_URL: str, API_KEY: str) -> dict[str, int]:
@@ -16,9 +13,7 @@ def getCoordinatesByZipCode(API_BASE_URL: str, API_KEY: str) -> dict[str, int]:
     )
     data: dict[str, Any] = requests_handler.performRequest(request_url)
 
-    message: str = f'Identified city: {data["name"]}'
-    logger.info(message)
-    print(message)
+    logs.infoLog(f'Identified city: {data["name"]}')
 
     try:
         coordinates: dict[str, int] = {
@@ -27,9 +22,9 @@ def getCoordinatesByZipCode(API_BASE_URL: str, API_KEY: str) -> dict[str, int]:
         }
         return coordinates
     except:
-        message = "Error trying to extract latitude and longitude according to the ZIP_CODE and the COUNTRY_CODE env variables"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "Error trying to extract latitude and longitude according to the ZIP_CODE and the COUNTRY_CODE env variables"
+        )
 
 
 def extractCurrentWeatherData() -> dict[str, Any]:

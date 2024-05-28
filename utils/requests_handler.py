@@ -12,6 +12,4 @@ def performRequest(request_url) -> dict[str, Any]:
         data: dict[str, Any] = response.json()
         return data
     except:
-        message: str = f"Error performing request to the URL: {request_url}"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(f"Error performing request to the URL: {request_url}")

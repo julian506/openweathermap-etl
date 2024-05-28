@@ -6,9 +6,6 @@ import uuid as uuid_lib
 from sqlalchemy import create_engine, desc
 from classes.ManizalesWeather import ManizalesWeather
 from utils import env_variables, logs
-from logging import Logger
-
-logger: Logger = logs.getLogger()
 
 
 def isCurrentRecordNew(session, new_weather_record: ManizalesWeather) -> bool:
@@ -19,9 +16,9 @@ def isCurrentRecordNew(session, new_weather_record: ManizalesWeather) -> bool:
             .first()
         )
     except:
-        message = "There was an error trying to retrieve the latest register from the database"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error trying to retrieve the latest register from the database"
+        )
 
     if latest_record_in_db == None:
         return True
@@ -34,29 +31,26 @@ def createAzureSession(AZURE_ODBC_CONNECTION_STRING: str) -> Session:
         conn_str: str = f"mssql+pyodbc:///?odbc_connect={params}"
         engine = create_engine(conn_str, echo=True)
 
-        logger.info(
+        logs.infoLog(
             "The connection with the Azure SQL Database has been completed successfully"
         )
         return Session(engine)
     except:
-        message = "There was an error creating the Azure Session"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog("There was an error creating the Azure Session")
 
 
 def commitDataIntoDatabase(session: Session, new_weather_record: ManizalesWeather):
     try:
         session.add(new_weather_record)
         session.commit()
-        message = "The new record has been successfully commited into the database"
-        logger.info(message)
+        logs.infoLog("The new record has been successfully commited into the database")
     except:
-        message = "There was an error commiting the new data into the database."
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error commiting the new data into the database"
+        )
 
 
-def upload_data(transformed_weather_data):
+def upload_data(transformed_weather_data) -> None:
     AZURE_ODBC_CONNECTION_STRING: str = env_variables.readEnvVariable(
         "AZURE_ODBC_CONNECTION_STRING"
     )
@@ -73,11 +67,10 @@ def upload_data(transformed_weather_data):
         )
 
         if not isCurrentRecordNew(session, new_weather_record):
-            message = (
+            logs.infoLog(
                 "Current data is not newer than the data existing in the DB. Skiping."
             )
-            logger.info(message)
-            print(message)
             return
 
         commitDataIntoDatabase(session, new_weather_record)
+    return

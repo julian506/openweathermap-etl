@@ -1,27 +1,24 @@
 import datetime
 from typing import Any
 from utils import logs
-from logging import Logger
-
-logger: Logger = logs.getLogger()
 
 
 def extractTemperatureValues(data) -> dict[str, float]:
     try:
         return {**data["main"]}
     except:
-        message = "There was an error trying to get the temperature values from the extracted data"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error trying to get the temperature values from the extracted data"
+        )
 
 
 def kelvinToCelsius(temp: float) -> float:
     try:
         return round(temp - 273.15, 2)
     except:
-        message = "There was an error trying to convert from Kelvin degrees to Celsius degrees"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error trying to convert from Kelvin degrees to Celsius degrees"
+        )
 
 
 def convertTemperatureValuesToCelsius(
@@ -35,18 +32,18 @@ def convertTemperatureValuesToCelsius(
         }
         return celsius_temperature_values
     except:
-        message = "There was an error creating the celsius_temperature_values dictionary from the original Kelvin degrees values"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error creating the celsius_temperature_values dictionary from the original Kelvin degrees values"
+        )
 
 
 def extractUtcDatetime(extracted_data: dict[str, Any]) -> int:
     try:
         return extracted_data["dt"]
     except:
-        message = "There was an error while extracting the UTC datetime from the extracted data"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error while extracting the UTC datetime from the extracted data"
+        )
 
 
 def addTimestampToData(
@@ -62,9 +59,9 @@ def addTimestampToData(
         )
         return data_with_timestamp
     except:
-        message = "There was an error trying to add the timestamps to the celsius_temperature_values"
-        logger.exception(message)
-        raise Exception(message)
+        raise logs.exceptionLog(
+            "There was an error trying to add the timestamps to the celsius_temperature_values"
+        )
 
 
 def transformExtractedData(
