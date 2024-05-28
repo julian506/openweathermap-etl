@@ -4,15 +4,15 @@ import urllib
 from sqlalchemy.orm import Session
 import uuid as uuid_lib
 from sqlalchemy import create_engine, desc
-from classes.ManizalesWeather import ManizalesWeather
+from classes.TemperatureData import TemperatureData
 from utils import env_variables, logs
 
 
-def isCurrentRecordNew(session, new_weather_record: ManizalesWeather) -> bool:
+def isCurrentRecordNew(session, new_weather_record: TemperatureData) -> bool:
     try:
-        latest_record_in_db: ManizalesWeather = (
-            session.query(ManizalesWeather)
-            .order_by(desc(ManizalesWeather.datetime))
+        latest_record_in_db: TemperatureData = (
+            session.query(TemperatureData)
+            .order_by(desc(TemperatureData.datetime))
             .first()
         )
     except:
@@ -39,7 +39,7 @@ def createAzureSession(AZURE_ODBC_CONNECTION_STRING: str) -> Session:
         raise logs.exceptionLog("There was an error creating the Azure Session")
 
 
-def commitDataIntoDatabase(session: Session, new_weather_record: ManizalesWeather):
+def commitDataIntoDatabase(session: Session, new_weather_record: TemperatureData):
     try:
         session.add(new_weather_record)
         session.commit()
@@ -56,7 +56,7 @@ def upload_data(transformed_weather_data) -> None:
     )
 
     with createAzureSession(AZURE_ODBC_CONNECTION_STRING) as session:
-        new_weather_record = ManizalesWeather(
+        new_weather_record = TemperatureData(
             uuid_value=uuid_lib.uuid4(),
             datetime=transformed_weather_data["datetime"],
             consulted_at=transformed_weather_data["consulted_at"],

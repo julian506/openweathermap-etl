@@ -30,6 +30,7 @@ if __name__ == "__main__":
     
     logs.infoLog(f"Starting script at {datetime.datetime.now()}")
 
+    print(env_variables.readEnvVariable('AZURE_TABLE_NAME'))
     PIPELINE_EXECUTION_INTERVAL_IN_MINUTES: str = env_variables.readEnvVariable(
         "PIPELINE_EXECUTION_INTERVAL_IN_MINUTES"
     )
