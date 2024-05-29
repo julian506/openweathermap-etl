@@ -15,6 +15,11 @@ This project was built during my internship at Globant.
 - Logging for all the events of the ETL Pipeline, creating a log file for each of the script executions
 
 
+## Requirements
+
+You need to have installed the latest version of [Docker and Docker Compose](https://docs.docker.com/engine/install/) in order to run this project.
+
+
 ## Deployment
 
 To deploy this project, follow the next steps:
