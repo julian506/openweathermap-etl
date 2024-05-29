@@ -19,6 +19,21 @@ This project was built during my internship at Globant.
 
 You need to have installed the latest version of [Docker and Docker Compose](https://docs.docker.com/engine/install/) in order to run this project.
 
+You'll also need an Azure SQL Database with a table with the next schema:
+
+```sql
+CREATE TABLE [dbo].[weather] (
+    [uuid]         UNIQUEIDENTIFIER NOT NULL,
+    [datetime]     DATETIME         NOT NULL,
+    [consulted_at] DATETIME         NOT NULL,
+    [temp]         REAL             NOT NULL,
+    [temp_min]     REAL             NOT NULL,
+    [temp_max]     REAL             NOT NULL,
+    [feels_like]   REAL             NOT NULL,
+    CONSTRAINT [PK_weather] PRIMARY KEY CLUSTERED ([uuid] ASC)
+);
+```
+
 
 ## Deployment
 
