@@ -1,0 +1,5 @@
+pyodbc
+azure-identity
+python-dotenv
+sqlalchemy
+schedule
